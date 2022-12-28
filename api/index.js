@@ -1,10 +1,13 @@
 const express = require("express");
+var bodyParser = require("body-parser");
 
 const connectDB = require("../config/db");
 const categoryRoutes = require("../routes/categoryRoutes");
 
 connectDB();
 const app = express();
+
+app.use(bodyParser.json());
 
 app.get("/", (req, res) => {
   res.send("App works properly!");
