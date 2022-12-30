@@ -7,6 +7,7 @@ const {
   loginUser,
   forgetPassword,
   resetPassword,
+  signUpWithProvider,
   changePassword,
   getAllUsers,
   getUserById,
@@ -27,6 +28,9 @@ router.post("/register/:token", registerUser);
 
 // login user
 router.post("/login", loginUser);
+
+//register or login with google and fb
+router.post("/signup", signUpWithProvider);
 
 // forget password
 router.put("/forget-password", passwordVerificationLimit, forgetPassword);
