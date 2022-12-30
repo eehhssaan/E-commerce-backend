@@ -22,7 +22,7 @@ router.post("/add", addProducts);
 router.post("/all", addAllProducts);
 
 // get shwoing products
-router.get("/showing", getShowingProducts);
+router.get("/show", getShowingProducts);
 
 // get discounted products
 router.get("/discount", getDiscountedProducts);

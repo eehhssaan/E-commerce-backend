@@ -13,7 +13,7 @@ const {
 router.get("/", getAllOrders);
 
 // get order by user
-router.get("/:user", getOrderByUser);
+router.get("/user/:id", getOrderByUser);
 
 // get order by id
 router.get("/:id", getOrderById);
