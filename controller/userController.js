@@ -19,7 +19,7 @@ const verifyEmailAddress = async (req, res) => {
       subject: "Email Activation",
       subject: "Verify Your Email",
       html: `<h2>Hello ${req.body.email}</h2>
-      <p>Verify your email address to complete the signup and login into your <strong>KachaBazar</strong> account.</p>
+      <p>Verify your email address to complete the signup and login into your <strong>E-commerce Backend</strong> account.</p>
 
         <p>This link will expire in <strong> 15 minute</strong>.</p>
 
@@ -27,10 +27,10 @@ const verifyEmailAddress = async (req, res) => {
 
         <a href=${process.env.STORE_URL}/user/email-verification/${token} style="background:#22c55e;color:white;border:1px solid #22c55e; padding: 10px 15px; border-radius: 4px; text-decoration:none;">Verify Account</a>
 
-        <p style="margin-top: 35px;">If you did not initiate this request, please contact us immediately at support@kachabazar.com</p>
+        <p style="margin-top: 35px;">If you did not initiate this request, please contact us immediately at support@E-commerce Backend.com</p>
 
         <p style="margin-bottom:0px;">Thank you</p>
-        <strong>Kachabazar Team</strong>
+        <strong>E-commerce Backend Team</strong>
              `,
     };
     const message = "Please check your email to verify!";
@@ -113,4 +113,165 @@ const loginUser = async (req, res) => {
   }
 };
 
-module.exports = { registerUser, loginUser };
+// forgetPassword
+const forgetPassword = async (req, res) => {
+  const isAdded = await User.findOne({ email: req.body.verifyEmail });
+  if (!isAdded) {
+    res.status(401).send({
+      message: "User not found with this emails",
+    });
+  } else {
+    const token = tokenForVerify(isAdded);
+    const body = {
+      from: process.env.EMAIL_USER,
+      to: `${req.body.verifyEmail}`,
+      subject: "Password Reset",
+      html: `<h2>Hello ${req.body.verifyEmail}</h2>
+      <p>A request has been received to change the password for your <strong>E-commerce Backend</strong> account </p>
+
+        <p>This link will expire in <strong> 15 minute</strong>.</p>
+
+        <p style="margin-bottom:20px;">Click this link for reset your password</p>
+
+        <a href=${process.env.STORE_URL}/user/forget-password/${token} style="background:#22c55e;color:white;border:1px solid #22c55e; padding: 10px 15px; border-radius: 4px; text-decoration:none;">Reset Password</a>
+
+        <p style="margin-top: 35px;">If you did not initiate this request, please contact us immediately at support@E-commerce Backend.com</p>
+
+        <p style="margin-bottom:0px;">Thank you</p>
+        <strong>E-commerce Backend Team</strong>
+             `,
+    };
+    const message = "Please check your email to reset password!";
+    sendEmail(body, res, message);
+  }
+};
+
+// reset password
+const resetPassword = async (req, res) => {
+  const token = req.body.token;
+  const { email } = jwt.decode(token);
+  const user = await User.findOne({ email: email });
+
+  if (token) {
+    jwt.verify(token, process.env.JWT_SECRET_FOR_VERIFY, (err, token) => {
+      if (err) {
+        return res.status(500).send({
+          message: "Token expired, please try again!",
+        });
+      } else {
+        user.password = bcrypt.hashSync(req.body.newPassword);
+        user.save();
+        res.send({
+          message: "Your password change successful, you can login now!",
+        });
+      }
+    });
+  }
+};
+
+// change password
+const changePassword = async (req, res) => {
+  try {
+    const user = await User.findOne({ email: req.body.email });
+
+    if (!user.password) {
+      return res.status(401).send({
+        message:
+          "For change password,You need to sign in with email & password!",
+      });
+    } else if (
+      user &&
+      bcrypt.compareSync(req.body.currentPassword, user.password)
+    ) {
+      user.password = bcrypt.hashSync(req.body.newPassword);
+      await user.save();
+      res.send({
+        message: "Your password change successfully!",
+      });
+    } else {
+      res.status(401).send({
+        message: "Invalid email or current password!",
+      });
+    }
+  } catch (err) {
+    res.status(500).send({
+      message: err.message,
+    });
+  }
+};
+
+// get all users
+const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find({}).sort({ _id: -1 });
+    res.send(users);
+  } catch (err) {
+    res.status(500).send({
+      message: err.message,
+    });
+  }
+};
+
+const getUserById = async (req, res) => {
+  try {
+    const user = await User.findById(req.body.id);
+    res.send(user);
+  } catch (err) {
+    res.status(500).send({
+      message: err.message,
+    });
+  }
+};
+
+const updateUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.body.id);
+    if (user) {
+      user.name = req.body.name;
+      user.email = req.body.email;
+      user.address = req.body.address;
+      user.phone = req.body.phone;
+      user.image = req.body.image;
+      const updatedUser = await user.save();
+      const token = signInToken(updatedUser);
+      res.send({
+        token,
+        _id: updatedUser._id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        address: updatedUser.address,
+        phone: updatedUser.phone,
+        image: updatedUser.image,
+      });
+    }
+  } catch (err) {
+    res.status(404).send({
+      message: "Your email is not valid!",
+    });
+  }
+};
+
+const deleteUser = async (req, res) => {
+  User.deleteOne({ _id: req.params.id }, (err) => {
+    if (err) {
+      res.status(500).send({ message: err.message });
+    } else {
+      res.status(200).send({
+        message: "User Deleted Successfully!",
+      });
+    }
+  });
+};
+
+module.exports = {
+  verifyEmailAddress,
+  registerUser,
+  loginUser,
+  forgetPassword,
+  resetPassword,
+  changePassword,
+  getAllUsers,
+  getUserById,
+  updateUser,
+  deleteUser,
+};

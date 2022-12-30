@@ -32,6 +32,20 @@ const tokenForVerify = (user) => {
   );
 };
 
+const isAuth = (req, res, next) => {
+  const { authorization } = req.headers;
+  try {
+    const token = authorization.split(" ")[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded;
+    next();
+  } catch (err) {
+    res.status(401).send({
+      message: err.message,
+    });
+  }
+};
+
 const sendEmail = (body, res, message) => {
   const transporter = nodemailer.createTransport({
     host: process.env.HOST,
@@ -77,4 +91,5 @@ module.exports = {
   signInToken,
   tokenForVerify,
   sendEmail,
+  isAuth,
 };
