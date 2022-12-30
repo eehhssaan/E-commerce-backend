@@ -10,6 +10,7 @@ const couponRouters = require("../routes/couponRoutes");
 const userRoutes = require("../routes/userRoutes");
 const orderRoutes = require("../routes/orderRoutes");
 const userOrderRoutes = require("../routes/userOrderRoutes");
+const adminRoutes = require("../routes/adminRoutes");
 
 const { isAuth } = require("../config/auth");
 
@@ -30,6 +31,7 @@ app.use("/api/user/", userRoutes);
 app.use("/api/order/", isAuth, userOrderRoutes);
 
 //if you not use admin dashboard then these two route will not needed.
+app.use("/api/admin/", adminRoutes);
 app.use("/api/orders/", isAuth, orderRoutes);
 
 const PORT = process.env.PORT || 5000;
