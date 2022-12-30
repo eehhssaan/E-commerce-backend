@@ -200,6 +200,45 @@ const changePassword = async (req, res) => {
   }
 };
 
+const signUpWithProvider = async (req, res) => {
+  try {
+    const isAdded = await User.findOne({ email: req.body.email });
+
+    if (isAdded) {
+      const token = signInToken(isAdded);
+      res.send({
+        token,
+        _id: isAdded._id,
+        name: isAdded.name,
+        email: isAdded.email,
+        address: isAdded.address,
+        phone: isAdded.phone,
+        image: isAdded.image,
+      });
+    } else {
+      const newUser = new User({
+        name: req.body.name,
+        email: req.body.email,
+        image: req.body.image,
+      });
+
+      const user = await newUser.save();
+      const token = signInToken(user);
+      res.send({
+        token,
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        image: user.image,
+      });
+    }
+  } catch (err) {
+    res.status(500).send({
+      message: err.message,
+    });
+  }
+};
+
 // get all users
 const getAllUsers = async (req, res) => {
   try {
@@ -269,6 +308,7 @@ module.exports = {
   loginUser,
   forgetPassword,
   resetPassword,
+  signUpWithProvider,
   changePassword,
   getAllUsers,
   getUserById,
