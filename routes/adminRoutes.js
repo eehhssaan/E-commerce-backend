@@ -16,7 +16,7 @@ const {
 } = require("../controller/adminController");
 
 //register a staff
-router.post("/register-admin", registerAdmin);
+router.post("/register", registerAdmin);
 
 // login Admin
 router.post("/login", loginAdmin);

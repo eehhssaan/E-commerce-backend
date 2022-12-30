@@ -30,10 +30,10 @@ router.get("/:id", getCategoryById);
 // Update a category
 router.put("/:id", updateCategory);
 
-// Delete a category
-router.patch("/:id", deleteCategory);
-
 // update status
 router.put("/status/:id", updateStatus);
+
+// Delete a category
+router.patch("/:id", deleteCategory);
 
 module.exports = router;
